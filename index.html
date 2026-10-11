@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>부노트</title>
+<style>
+  /* ponytail: 배너 높이는 브라우저/기기마다 몇 px씩 다를 수 있음.
+     안 잘리거나 너무 많이 잘리면 이 값만 조절할 것 (기본 56px). */
+  :root { --gas-banner-height: 56px; }
+
+  html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #fff; }
+
+  #frame-wrap {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    overflow: hidden;
+  }
+
+  #app-frame {
+    position: absolute;
+    top: calc(-1 * var(--gas-banner-height));
+    left: 0;
+    width: 100%;
+    height: calc(100% + var(--gas-banner-height));
+    border: 0;
+  }
+
+  #error-msg {
+    display: none;
+    padding: 40px;
+    font: 14px/1.6 sans-serif;
+    color: #666;
+  }
+</style>
+</head>
+<body>
+  <div id="frame-wrap">
+    <iframe id="app-frame"></iframe>
+  </div>
+  <div id="error-msg">잘못된 접속 링크입니다. 고객사별 URL을 다시 확인해주세요.</div>
+
+  <script>
+    // 사용법: 이 페이지 주소 뒤에 ?u=<고객 /exec 배포 URL(URL 인코딩)> 붙여서 접속
+    // 예: https://내도메인.com/?u=https%3A%2F%2Fscript.google.com%2Fmacros%2Fs%2FAKfycb...%2Fexec
+    var raw = new URLSearchParams(location.search).get('u');
+
+    // 신뢰 경계: script.google.com 도메인의 /exec 배포 URL만 허용 (임의 사이트 iframe 방지)
+    var isValid = raw && /^https:\/\/script\.google\.com\/(a\/macros\/[^/]+|macros)\/s\/[A-Za-z0-9_-]+\/exec$/.test(raw);
+
+    if (isValid) {
+      document.getElementById('app-frame').src = raw;
+    } else {
+      document.getElementById('frame-wrap').style.display = 'none';
+      document.getElementById('error-msg').style.display = 'block';
+    }
+  </script>
+</body>
+</html>
