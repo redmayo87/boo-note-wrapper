@@ -19,11 +19,20 @@
 
   #app-frame {
     position: absolute;
-    top: calc(-1 * var(--gas-banner-height));
+    top: 0;
     left: 0;
     width: 100%;
-    height: calc(100% + var(--gas-banner-height));
+    height: 100%;
     border: 0;
+  }
+
+  /* 배너 높이만큼 끌어올려 잘라내는 클립은 데스크톱에서만(.clip 클래스, JS가 판단해서 붙임).
+     모바일은 기기/브라우저마다 배너 높이가 달라(측정 불가 — 다른 출처 iframe) 잘못 잘라내면
+     부노트 자체 상단바(사이드바 토글 포함)까지 함께 잘려 사라지는 사고가 났다(2026-10 실고객
+     신고). 모바일은 안전하게 배너를 그대로 보여준다(클립 생략) — 미관보다 기능 우선. */
+  #frame-wrap.clip #app-frame {
+    top: calc(-1 * var(--gas-banner-height));
+    height: calc(100% + var(--gas-banner-height));
   }
 
   #error-msg {
@@ -49,6 +58,8 @@
     var isValid = raw && /^https:\/\/script\.google\.com\/(a\/macros\/[^/]+|macros)\/s\/[A-Za-z0-9_-]+\/exec$/.test(raw);
 
     if (isValid) {
+      // 데스크톱(768px 초과)만 배너 클립 적용 — 모바일은 배너 그대로 노출(위 CSS 주석 참고).
+      if (window.innerWidth > 768) document.getElementById('frame-wrap').classList.add('clip');
       document.getElementById('app-frame').src = raw;
     } else {
       document.getElementById('frame-wrap').style.display = 'none';
