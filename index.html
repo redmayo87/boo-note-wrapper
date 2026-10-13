@@ -26,10 +26,10 @@
     border: 0;
   }
 
-  /* 배너 높이만큼 끌어올려 잘라내는 클립은 데스크톱에서만(.clip 클래스, JS가 판단해서 붙임).
-     모바일은 기기/브라우저마다 배너 높이가 달라(측정 불가 — 다른 출처 iframe) 잘못 잘라내면
-     부노트 자체 상단바(사이드바 토글 포함)까지 함께 잘려 사라지는 사고가 났다(2026-10 실고객
-     신고). 모바일은 안전하게 배너를 그대로 보여준다(클립 생략) — 미관보다 기능 우선. */
+  /* [2026-10 전면 비활성화] 아래 JS가 더 이상 .clip을 붙이지 않음 — 데스크톱/모바일 둘 다 적용 안 됨.
+     cross-origin iframe이라 실제 구글 배너 높이를 측정할 방법이 없어 56px 고정값 추측이 배너 대신
+     부노트 자체 상단바(알림/장바구니/테마토글/사이드바)를 잘라먹는 사고가 반복됨(모바일→데스크톱
+     순으로 재현). 규칙 자체는 남겨두되(나중에 신뢰할 측정법이 생기면 재활성화 가능) 현재는 죽은 코드. */
   #frame-wrap.clip #app-frame {
     top: calc(-1 * var(--gas-banner-height));
     height: calc(100% + var(--gas-banner-height));
@@ -58,8 +58,11 @@
     var isValid = raw && /^https:\/\/script\.google\.com\/(a\/macros\/[^/]+|macros)\/s\/[A-Za-z0-9_-]+\/exec$/.test(raw);
 
     if (isValid) {
-      // 데스크톱(768px 초과)만 배너 클립 적용 — 모바일은 배너 그대로 노출(위 CSS 주석 참고).
-      if (window.innerWidth > 768) document.getElementById('frame-wrap').classList.add('clip');
+      // [2026-10 비활성화] 데스크톱 클립도 실고객 환경에서 배너 대신 부노트 자체 상단바(알림/장바구니/
+      // 테마토글/사이드바)를 통째로 잘라먹는 사고 발생 — cross-origin iframe이라 실제 배너 높이를 JS로
+      // 측정할 방법이 없어 56px 고정값 추측 자체가 신뢰 불가로 판명됨. 신뢰할 측정법 생기기 전까진
+      // .clip 미적용(배너는 다시 보이지만 앱 네비게이션은 항상 정상 노출 — 기능이 미관보다 우선).
+      // if (window.innerWidth > 768) document.getElementById('frame-wrap').classList.add('clip');
       document.getElementById('app-frame').src = raw;
     } else {
       document.getElementById('frame-wrap').style.display = 'none';
