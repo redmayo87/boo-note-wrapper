@@ -54,8 +54,11 @@
     // 예: https://내도메인.com/?u=https%3A%2F%2Fscript.google.com%2Fmacros%2Fs%2FAKfycb...%2Fexec
     var raw = new URLSearchParams(location.search).get('u');
 
-    // 신뢰 경계: script.google.com 도메인의 /exec 배포 URL만 허용 (임의 사이트 iframe 방지)
-    var isValid = raw && /^https:\/\/script\.google\.com\/(a\/macros\/[^/]+|macros)\/s\/[A-Za-z0-9_-]+\/exec$/.test(raw);
+    // 신뢰 경계: script.google.com 도메인의 /exec 배포 URL만 허용 (임의 사이트 iframe 방지).
+    // /exec 뒤 쿼리스트링(?mode=detail&id=... 등)도 허용 — 상세정보/장바구니 팝업은 /exec에 쿼리가
+    // 붙은 URL을 그대로 u로 넘기는데, 예전엔 끝앵커($)가 /exec 바로 뒤라 쿼리 붙은 링크를 전부
+    // "잘못된 접속 링크"로 막아버렸다(2026-10 실고객 신고 — 상세정보/장바구니 팝업 전부 안 열림).
+    var isValid = raw && /^https:\/\/script\.google\.com\/(a\/macros\/[^/]+|macros)\/s\/[A-Za-z0-9_-]+\/exec(\?.*)?$/.test(raw);
 
     if (isValid) {
       // [2026-10 비활성화] 데스크톱 클립도 실고객 환경에서 배너 대신 부노트 자체 상단바(알림/장바구니/
